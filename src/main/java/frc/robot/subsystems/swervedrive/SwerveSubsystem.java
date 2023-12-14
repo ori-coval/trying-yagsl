@@ -27,16 +27,6 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase
 {
 
-  public static SwerveSubsystem instance;
-
-  public static SwerveSubsystem getInstace(){
-    if(instance == null){
-      instance = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
-      "swerve"));
-    }
-    return instance;
-  }
-
   /**
    * Swerve drive object.
    */
@@ -44,7 +34,17 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Maximum speed of the robot in meters per second, used to limit acceleration.
    */
-  public  double            maximumSpeed = Units.feetToMeters(14.5);
+  public double maximumSpeed = Units.feetToMeters(14.5);
+  
+  public static SwerveSubsystem instance;
+
+  // singelton
+  public static SwerveSubsystem getInstance() {
+    if (instance == null) {
+      instance = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),"swerve"));
+    }
+    return instance;
+  }
 
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
@@ -57,8 +57,8 @@ public class SwerveSubsystem extends SubsystemBase
     //  In this case the gear ratio is 12.8 motor revolutions per wheel rotation.
     //  The encoder resolution per motor revolution is 1 per motor revolution.
     double angleConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(12.8, 1);
-    // Motor conversion factor is (PI * WHEEL DIAMETER) / (GEAR RATIO * ENCODER RESOLUTION).
-    //  In this case the wheel diameter is 4 inches.
+    // Motor conversion factor is (PI * WHEEL DIAMETER IN METERS) / (GEAR RATIO * ENCODER RESOLUTION).
+    //  In this case the wheel diameter is 4 inches, which must be converted to meters to get meters/second.
     //  The gear ratio is 6.75 motor revolutions per wheel rotation.
     //  The encoder resolution per motor revolution is 1 per motor revolution.
     double driveConversionFactor = SwerveMath.calculateMetersPerRotation(Units.inchesToMeters(4), 6.75, 1);
@@ -79,8 +79,6 @@ public class SwerveSubsystem extends SubsystemBase
       throw new RuntimeException(e);
     }
     swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-
-    PathPlanner.getInstace();
   }
 
   /**

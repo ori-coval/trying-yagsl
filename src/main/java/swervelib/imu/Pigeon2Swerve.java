@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Optional;
 
-/** 
+/**
  * SwerveIMU interface for the Pigeon2
  */
 public class Pigeon2Swerve extends SwerveIMU
