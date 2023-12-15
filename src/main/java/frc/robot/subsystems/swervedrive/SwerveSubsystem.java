@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.io.File;
 import swervelib.SwerveController;
@@ -30,13 +29,16 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Swerve drive object.
    */
-  private final SwerveDrive       swerveDrive;
+  private final SwerveDrive swerveDrive;
+  
+  private final Vision vision = Vision.getInstance();
+
   /**
    * Maximum speed of the robot in meters per second, used to limit acceleration.
    */
   public double maximumSpeed = Units.feetToMeters(14.5);
   
-  public static SwerveSubsystem instance;
+  private static SwerveSubsystem instance;
 
   // singelton
   public static SwerveSubsystem getInstance() {
@@ -137,6 +139,7 @@ public class SwerveSubsystem extends SubsystemBase
   @Override
   public void periodic()
   {
+    updateVision();
   }
 
   @Override
@@ -321,8 +324,18 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Add a fake vision reading for testing purposes.
    */
-  public void addFakeVisionReading()
-  {
-    swerveDrive.addVisionMeasurement(new Pose2d(3, 3, Rotation2d.fromDegrees(65)), Timer.getFPGATimestamp());
+  public void updateVision(){
+    var visionEst = vision.getEstimatedGlobalPose();
+    visionEst.ifPresent(
+        est -> {
+          var estPose = est.estimatedPose.toPose2d();
+          // Change our trust in the measurement based on the tags we can see
+          var estStdDevs = vision.getEstimationStdDevs(estPose);
+
+          swerveDrive.addVisionMeasurement(
+              est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+             
+          swerveDrive.setGyroOffset(vision.getEstimatedGlobalPose().get().estimatedPose.getRotation());
+        });
   }
 }
