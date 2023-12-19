@@ -21,7 +21,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 /** Add your docs here. */
 public class PathPlanner {
 
-    public static PathPlanner instance;
+    private static PathPlanner instance;
 
     public static PathPlanner getInstace() {
         if (instance == null) {
@@ -71,7 +71,7 @@ public class PathPlanner {
     }
     
     public void pathFind(Pose2d targetPose) {// TODO: constants
-        pathFind(targetPose, null, 0, 0);
+        pathFind(targetPose, new PathConstraints(4, 400, 4, 400), 0, 0);
     }
 
     public PathPlannerPath generatePath(List<Translation2d> bezierPoints, GoalEndState goalEndState) {// TODO: constants
